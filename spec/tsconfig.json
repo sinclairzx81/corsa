@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module":           "amd",
+    "outFile":          "../spec.js",
+    "moduleResolution": "node",
+    "removeComments":   true,
+    "lib":              ["es2015", "dom"]
+  },
+  "files": ["index.ts"]
+}
