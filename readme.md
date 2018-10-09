@@ -38,7 +38,7 @@ The following creates a bounded channel which allows for sending `5` values befo
 const [tx, rx] = channel(5)
 ```
 
-## sending
+## send
 
 The following code create a unbounded channel and sends the values `1, 2, 3` following by a `null`. The `null` is a signal to the receiver that the stream of values has finished. A `null` value will cause the `for await-of` block to finish.
 
@@ -51,7 +51,8 @@ tx.send(3)
 tx.send(null)
 
 ```
-## receiving
+
+## receive
 
 The `Receiver<T>` side of a channel supports `for-await-of` for general iteration. 
 
@@ -105,6 +106,36 @@ rx.next()        // resume   ------+
 ```
 
 Note, this behaviour is intended to ease back pressure in streaming scenarios where the sender may emit values faster than a receiver can receive them. The behaviour of the `awaitable send` is modelled on the `std::sync::mpsc::SyncSender<T>` type found in the Rust standard library. But rather than blocking, this library leverages await to suspend.
+
+## error handling
+
+A `Sender<T>` can emit a error value with the following..
+
+```typescript
+const [tx, rx] = channel()
+tx.send(3)
+tx.send(2)
+tx.send(1)
+tx.send(new Error('bang'))
+
+```
+This will resolve in a `throw` being raised at the `Receiver<T>`. This can be caught at handled with typical `try/catch` logic.
+
+```typescript
+try {
+  for await (const n of rx) {
+    console.log(n)
+  }
+} catch(error) {
+  console.log(error) 
+}
+
+// prints:
+// 3
+// 2
+// 1
+// error: 'bang'
+```
 
 ## select
 
