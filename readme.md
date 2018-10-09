@@ -35,7 +35,7 @@ A channel is a uni-directional pipe for which data can flow. The following code 
 ```typescript
 const [tx, rx] = channel()
 ```
-The following creates a bounded channel which allows for only `5` (see bounded vs unbounded)
+The following creates a bounded channel which allows for sending `5` values before suspending (see bounded vs unbounded)
 
 ```typescript
 const [tx, rx] = channel(5)
