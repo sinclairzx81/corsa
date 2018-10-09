@@ -5,28 +5,25 @@ An experiment using JavaScript's `AsyncIterator<T>` to build fast / memory effec
 ```typescript
 import { channel } from './channels'
 
-const [producer, consumer] = channel()
+const [tx, rx] = channel()
 
-// generate stream
-setImmediate(async () => { 
-  await producer.send(0)
-  await producer.send(1)
-  await producer.send(2)
-  await producer.send(3)
-  await producer.send(null) // eof
-})
+tx.send(0)
+tx.send(1)
+tx.send(2)
+tx.send(3)
+tx.send(null) // eof
+
 ...
-for await (const value of consumer) {
-  console.log(value)
+for await (const n of rx) {
+  console.log(n)
 }
-console.log('done')
 ```
 
 ## overview
 
-This project is a experimental implementation of JavaScript's `AsyncIterator<T>` build asynchronous `pull` based channels in JavaScript. This project seeks to provide a fast / memory effecient means of streaming data asynchronouly which does not incur exceessive buffering or asynchronous overlap in high frequency messaging scenarios.
+This project is a experimental implementation of JavaScript's `AsyncIterator<T>` to allow for the building of asynchronous `pull` based channels in JavaScript. This project seeks to provide a fast / memory effecient means of streaming data asynchronouly which does not incur exceessive buffering or asynchronous overlap in high frequency messaging scenarios.
 
-This project makes heavy use of `async/await` and JavaScripts `for await-of` syntax. 
+This project makes heavy use of `async/await` and JavaScripts `for await-of` syntax and provides `linq` operators on receive.
 
 ## channel
 
@@ -43,7 +40,7 @@ const [tx, rx] = channel(5)
 
 ## sending
 
-The following code create a unbounded channel and sends 3 values to it `1, 2, 3` following by a `null`. The `null` is a signal to the receiver that the stream of values has finished. This will end iteration of a `for await-of` block. 
+The following code create a unbounded channel and sends the values `1, 2, 3` following by a `null`. The `null` is a signal to the receiver that the stream of values has finished. A `null` value will cause the `for await-of` block to finish.
 
 ```typescript
 const [tx, rx] = channel()
@@ -56,25 +53,20 @@ tx.send(null)
 ```
 ## receiving
 
-The following code receives values. Note that in order to receive values, one ideally should be within a `async` block. below we use setImmediate to move into a `block` for iteration.
+The `Receiver<T>` side of a channel supports `for-await-of` for general iteration. 
 
 ```typescript
-
 const [tx, rx] = channel()
 tx.send(1)
 tx.send(2)
 tx.send(3)
 tx.send(null)
 
-setImmediate(async () => {
-  for await (const value of rx) {
-    console.log(value)
-  }
-})
-// prints: 1, 2, 3
+for await (const n of rx) {
+  console.log(n)
+}
 ```
-
-Additionally, the `receiver` implements the `AsyncIterator` generator protocol, so one can pull values in the following way.
+But also provides many `linq` / `RxJs` inspired operators on the receiver.
 
 ```typescript
 const [tx, rx] = channel()
@@ -83,48 +75,52 @@ tx.send(2)
 tx.send(3)
 tx.send(null)
 
-rx.next().then(result => result.value) // 1
-rx.next().then(result => result.value) // 2
-rx.next().then(result => result.value) // 3
-rx.next().then(result => result.value) // null
+for await (const n of rx.filter(n => n % 2 === 0)
+                         .map(n => '#' + n)
+                         .reverse()) {
+  console.log(n)
+}
 
 ```
 
 ## bounded vs unbounded
 
-In this library, the `bound` given to a channel acts as a barrier for the `sender` to defer it from sending values
-when exceeding an internal limit (the `bound`). The deferring of the `send` is handled by `await` at the send call site.
+By default all channels are `unbounded` but it is possible to set a fixed buffering size when creating a `channel()`. When setting a channel size, this will cause a sender to `await` when sending values. The `await` at the sender will only occur once the channel has filled up with values. The sender will remained suspended until such time a receiver starts pulling values from the channel.
+
+The following code demostrates this behavior with channel bound to a buffer of 5.
 
 ```typescript
 const [tx, rx] = channel(5)
-await tx.send(0)
-await tx.send(1)
-await tx.send(2)
-await tx.send(3)
-await tx.send(4) 
-await tx.send(5) // blocks      <--+ receive one unblocks this send.
+await tx.send(0) // 1
+await tx.send(1) // 2
+await tx.send(2) // 3
+await tx.send(3) // 4
+await tx.send(4) // 5 - at capacity
+
+await tx.send(5) // suspend  <-----+
                  //                |
-...              //                | 
+...              //                |- rx.next() resumes the suspended tx.send() 
                  //                |
-rx.next()        // unblocks ------+
+rx.next()        // resume   ------+
 ```
-The effect of this is that sending logic can be suspended for a time until the receiver has received (and processed) previous values. This mechanism primarily helps to mitigate `back pressure` but preventing new values being sent faster than the receiver can receive.
+
+Note, this behaviour is intended to ease back pressure in streaming scenarios where the sender may emit values faster than a receiver can receive them. The behaviour of the `awaitable send` is modelled on the `std::sync::mpsc::SyncSender<T>` type found in the Rust standard library. But rather than blocking, this library leverages await to suspend.
 
 ## select
 
-This library provides a simple channel `select` similar to Gos channel select.
+This library provides a simple channel `select` function similar to that going in the Go programming language. It allows multiple `Receiver<T>` types to be combined into a singular stream.
 
 ```typescript
 import { channel, Receiver, select } from './channels'
 
 // stream an array of strings
-function strings(): Receiver<string> {
+function strings() {
   const [tx, rx] = channel<string>()
   setInterval(() => tx.send('hello world'), 100)
   return rx
 }
 // stream an array of numbers
-function numbers(): Receiver<number> {
+function numbers() {
   const [tx, rx] = channel<number>()
   setInterval(() => tx.send(Math.random()), 200)
   return rx
@@ -132,21 +128,9 @@ function numbers(): Receiver<number> {
 
 setImmediate(async () => {
   // combine streams into string|number[]
-  const receiver = select(strings(), numbers())
-  for await (const value of receiver) {
-    console.log(value)
+  const rx = select(strings(), numbers())
+  for await (const n of rx) {
+    console.log(n)
   }
 })
-```
-
-# tasks
-
-The following tasks are supported
-
-```
-npm run clean # cleans this project.
-npm run build # builds this project to ./bin.
-npm run spec  # executes specification for this project.
-npm run start # runs ./src/index.ts in watch mode.
-npm run lint  # lints this project
 ```
