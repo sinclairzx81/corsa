@@ -157,11 +157,11 @@ function numbers() {
   return rx
 }
 
-setImmediate(async () => {
-  // combine streams into string|number[]
+(async () => {
+  // combine streams into string | number[]
   const rx = select(strings(), numbers())
   for await (const n of rx) {
     console.log(n)
   }
-})
+})()
 ```
