@@ -1,6 +1,6 @@
 # async-channels
 
-An experiment using JavaScript's `AsyncIterator<T>` to build fast / memory effecient uni-directional channels in nodejs.
+An experiment using async iterators to build fast / memory efficient uni-directional channels in node.
 
 ```typescript
 import { channel } from './channels'
