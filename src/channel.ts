@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------
 
-async-channels - asynchronous channel iterators
+mpsc-js
 
 The MIT License (MIT)
 
