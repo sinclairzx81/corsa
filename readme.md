@@ -23,7 +23,7 @@ for await (const n of rx) {
 
 This project is a experimental implementation of JavaScript's `AsyncIterator<T>` to allow for the building of asynchronous `pull` based channels in JavaScript. This project seeks to provide a fast / memory effecient means of streaming data asynchronouly which does not incur excessive buffering or result in asynchronous overlap in high frequency messaging scenarios.
 
-This project makes heavy use of `async/await` and JavaScripts `for await-of` syntax and provides `rx` operators on receive.
+This project makes heavy use of `async/await` and JavaScripts `for await-of` syntax . Heavily inspired by Rust `std::sync::mpsc` channels.
 
 ## channel
 
