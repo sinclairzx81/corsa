@@ -10,13 +10,16 @@ const [tx, rx] = channel()
 tx.send(0)
 tx.send(1)
 tx.send(2)
-tx.send(3)
-tx.send(null) // eof
+tx.send(null) // EOF
 
 ...
 for await (const n of rx) {
   console.log(n)
 }
+// output:
+// 0
+// 1
+// 2
 ```
 
 ## overview
