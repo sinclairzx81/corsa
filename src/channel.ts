@@ -382,6 +382,24 @@ export class Receiver<T> implements AsyncIterator<T> {
     return acc
   }
 
+
+  /**
+   * (internal) shared sort function used by the `orderBy()` and `orderByDesending()` functions.
+   * @param {T[]} array the array to sort.
+   * @param {(T) => U} func the selection function.
+   * @param {'asc' | 'desc'} order the order.
+   * @returns {T[]}
+   */
+  private sort<T, U>(array: T[], func:(value: T) => U, order: 'asc' | 'desc'): T[] {
+    return array.sort((a, b) => {
+      let left  = func(a)
+      let right = func(b)
+      return (order === 'asc')
+        ? +(left > right) || +(left === right) - 1
+        : +(left < right) || +(left === right) - 1
+    })
+  }
+
   /**
    * Sorts the elements of a sequence in ascending order according to a key. This method requires
    * an internal collect().
@@ -392,11 +410,7 @@ export class Receiver<T> implements AsyncIterator<T> {
     const [tx, rx] = channel<T>(1)
     move(async () => {
       const collected = await this.collect()
-      const sorted = collected.sort((a, b) => {
-        let left = func(a)
-        let right = func(b)
-        return +(left > right) || +(left === right) - 1;
-      })
+      const sorted    = this.sort(collected, func, 'asc')
       for (const value of sorted) {
         await tx.send(value)
       }
@@ -415,11 +429,7 @@ export class Receiver<T> implements AsyncIterator<T> {
     const [tx, rx] = channel<T>(1)
     move(async () => {
       const collected = await this.collect()
-      const sorted = collected.sort((a, b) => {
-        let left = func(a)
-        let right = func(b)
-        return +(left < right) || +(left === right) - 1;
-      })
+      const sorted    = this.sort(collected, func, 'desc')
       for (const value of sorted) {
         await tx.send(value)
       }
@@ -773,7 +783,7 @@ export function select(...receivers: Array<Receiver<any>>): Receiver<any> {
  * @param {(Sender<T>) => Promise<void>} func the stream emitting function.
  * @returns {Receiver<T>}
  */
-export const source = <T>(func: (sender: Sender<T>) => Promise<void>): Receiver<T> => {
+export const source = <T>(func: (sender: Sender<T>) => void | Promise<void>): Receiver<T> => {
   const [tx, rx] = channel<T>(1)
   move(() => func(tx))
   return rx
