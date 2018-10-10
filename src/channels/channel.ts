@@ -31,6 +31,9 @@ POLYFILL['asyncIterator'] =
 POLYFILL[`asyncIterator`] || 
 POLYFILL.for('Symbol.asyncIterator')
 
+/** method stub used to move execution to a different call stack. */
+const move = (func: Function) => func()
+
 /**
  * Defer<T>
  * 
@@ -108,7 +111,7 @@ class Memory<T> {
    */
   public write (value: T): Promise<void> {
     return new Promise<void>(resolve => {
-      setImmediate(async () => {
+      move(async () => {
         if (this.buffer.length >= this.bounds) {
           await this.write_pause()
           this.reader_resume(value)
@@ -237,8 +240,7 @@ export class Receiver<T> implements AsyncIterator<T> {
    */
   public concat(receiver: Receiver<T>): Receiver<T> {
     const [tx, rx] = channel<T>(1)
-    setImmediate(async () => {
-      let index = 0
+    move(async () => {
       for await (const value of this) {
         await tx.send(value)
       }
@@ -267,7 +269,7 @@ export class Receiver<T> implements AsyncIterator<T> {
    */
   public distinct(): Receiver<T> {
     const [tx, rx] = channel<T>(1)
-    setImmediate(async () => {
+    move(async () => {
       let hash = []
       for await (const value of this) {
         if (hash.indexOf(value) === -1) {
@@ -341,7 +343,7 @@ export class Receiver<T> implements AsyncIterator<T> {
    */
   public intersect(receiver: Receiver<T>): Receiver<T> {
     const [tx, rx] = channel<T>(1)
-    setImmediate(async () => {
+    move(async () => {
       const collected = await receiver.collect()
       for await (const value of this) {
         if (collected.indexOf(value) !== -1) {
@@ -388,7 +390,7 @@ export class Receiver<T> implements AsyncIterator<T> {
    */
   public orderBy<U>(func: (value: T) => U): Receiver<T> {
     const [tx, rx] = channel<T>(1)
-    setImmediate(async () => {
+    move(async () => {
       const collected = await this.collect()
       const sorted = collected.sort((a, b) => {
         let left = func(a)
@@ -411,7 +413,7 @@ export class Receiver<T> implements AsyncIterator<T> {
    */
   public orderByDescending<U>(func: (value: T) => U): Receiver<T> {
     const [tx, rx] = channel<T>(1)
-    setImmediate(async () => {
+    move(async () => {
       const collected = await this.collect()
       const sorted = collected.sort((a, b) => {
         let left = func(a)
@@ -433,7 +435,7 @@ export class Receiver<T> implements AsyncIterator<T> {
    */
   public reverse(): Receiver<T> {
     const [tx, rx] = channel<T>(1)
-    setImmediate(async () => {
+    move(async () => {
       const collected = await this.collect()
       const reversed = collected.reverse()
       while(reversed.length > 0) {
@@ -451,7 +453,7 @@ export class Receiver<T> implements AsyncIterator<T> {
    */
   public select<U>(func: (value: T, index: number) => U): Receiver<U> {
     const [tx, rx] = channel<U>(1)
-    setImmediate(async () => {
+    move(async () => {
       let index = 0
       for await (const value of this) {
         const next = func(value, index++)
@@ -469,7 +471,7 @@ export class Receiver<T> implements AsyncIterator<T> {
    */
   public selectMany<U>(func: (value: T, index: number) => Array<U>): Receiver<U> {
     const [tx, rx] = channel<U>(1)
-    setImmediate(async () => {
+    move(async () => {
       let index = 0
       for await (const value of this) {
         const next = func(value, index++)
@@ -519,7 +521,7 @@ export class Receiver<T> implements AsyncIterator<T> {
    */
   public skip(count: number): Receiver<T> {
     const [tx, rx] = channel<T>(1)
-    setImmediate(async () => {
+    move(async () => {
       let index = 0
       for await (const value of this) {
         if(index >= count) {
@@ -553,7 +555,7 @@ export class Receiver<T> implements AsyncIterator<T> {
    */
   public take(count: number): Receiver<T> {
     const [tx, rx] = channel<T>(1)
-    setImmediate(async () => {
+    move(async () => {
       let index = 0
       for await (const value of this) {
         if(index < count) {
@@ -575,7 +577,7 @@ export class Receiver<T> implements AsyncIterator<T> {
    */
   public where(func: (value: T, index: number) => boolean): Receiver<T> {
     const [tx, rx] = channel<T>(1)
-    setImmediate(async () => {
+    move(async () => {
       let index = 0
       for await (const value of this) {
         if(func(value, index++)) {
@@ -773,6 +775,6 @@ export function select(...receivers: Array<Receiver<any>>): Receiver<any> {
  */
 export const source = <T>(func: (sender: Sender<T>) => Promise<void>): Receiver<T> => {
   const [tx, rx] = channel<T>(1)
-  setImmediate(() => func(tx))
+  move(() => func(tx))
   return rx
 }
