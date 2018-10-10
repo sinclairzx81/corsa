@@ -1,4 +1,4 @@
-# async-channels
+# mpsc-js
 
 An experiment using async iterators to build fast / memory efficient uni-directional channels in node.
 
