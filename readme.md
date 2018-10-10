@@ -139,7 +139,7 @@ try {
 
 ## select
 
-This library provides a simple channel `select` function similar to that going in the Go programming language. It allows multiple `Receiver<T>` types to be combined into a singular stream.
+This library provides a simple channel `select` function similar to multi channel select found in the Go programming language. It allows multiple `Receiver<T>` types to be combined into a singular stream.
 
 ```typescript
 import { channel, Receiver, select } from './channels'
