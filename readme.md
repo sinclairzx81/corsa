@@ -119,11 +119,10 @@ function numbers() {
   return reader
 }
 
-(async () => {
-  // combine streams into string | number[]
-  const rx = select(strings(), numbers())
-  for await (const n of rx) {
-    console.log(n)
+async function start() {
+  const reader = select(strings(), numbers())
+  for await (const value of reader) {
+    console.log(value)
   }
-})()
+}
 ```
