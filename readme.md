@@ -32,7 +32,7 @@ This project is a experimental implementation of JavaScript's `AsyncIterator<T>`
 
 This project makes heavy use of `async/await` and JavaScripts `for await-of` syntax. Built primarily for node 11 and above.
 
-## channel
+## channel&lt;T&gt;
 
 A channel is a uni-directional pipe for which data can flow. The following code creates an `unbounded` channel which allows for near infinite buffering of messages between `writer` and `reader`. The call to channel returns a `channel` object, which we destructure into the reader and writer pairs.
 
@@ -45,7 +45,7 @@ The following creates a bounded channel which allows for sending `5` values befo
 const { reader, writer }  = channel(5)
 ```
 
-## Writer<T>
+## Writer&lt;T&gt;
 
 The following code create a unbounded channel and sends the values `1, 2, 3` following by call to `end()` signalling to a reader `EOF`.
 
@@ -59,7 +59,7 @@ writer.end()
 
 ```
 
-## Reader<T>
+## Reader&lt;T&gt;
 
 The `Reader<T>` is the receiving side of a channel and supports `for-await-of` for general iteration. 
 
