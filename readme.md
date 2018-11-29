@@ -1,163 +1,122 @@
-# async-channels
+# Corsa
 
-An experiment using async iterators to build fast / memory efficient uni-directional channels in node.
+Asynchronous uni-directional channels in node using async iteration.
 
 ```typescript
-import { channel } from './channels'
 
-const [tx, rx] = channel()
+import { channel } from './corsa'
 
-tx.send(0)
-tx.send(1)
-tx.send(2)
-tx.send(null) // EOF
+async function start() {
 
-...
-for await (const n of rx) {
-  console.log(n)
+  const { reader, writer } = channel()
+
+  writer.write(0)
+  writer.write(1)
+  writer.write(2)
+  writer.end()
+
+  for await (const value of reader) {
+    console.log(value)
+  }
 }
-// output:
-// 0
-// 1
-// 2
+
+start()
+
+// output: 0, 1, 2
+
 ```
 
 ## overview
 
 This project is a experimental implementation of JavaScript's `AsyncIterator<T>` to allow for the building of asynchronous `pull` based channels in JavaScript. This project seeks to provide a fast / memory effecient means of streaming data asynchronouly which does not incur excessive buffering or result in asynchronous overlap in high frequency messaging scenarios.
 
-This project makes heavy use of `async/await` and JavaScripts `for await-of` syntax . Heavily inspired by Rust `std::sync::mpsc` channels.
+This project makes heavy use of `async/await` and JavaScripts `for await-of` syntax. Built primarily for node 11 and above.
 
 ## channel
 
-A channel is a uni-directional pipe for which data can flow. The following code creates an `unbounded` channel which allows for near infinite buffering of messages between `sender` and `receiver`. The call to channel returns a `tuple` type containing a `sender` and `receiver` pair.
+A channel is a uni-directional pipe for which data can flow. The following code creates an `unbounded` channel which allows for near infinite buffering of messages between `writer` and `reader`. The call to channel returns a `channel` object, which we destructure into the reader and writer pairs.
 
 ```typescript
-const [tx, rx] = channel()
+const { reader, writer } = channel()
 ```
 The following creates a bounded channel which allows for sending `5` values before suspending (see bounded vs unbounded)
 
 ```typescript
-const [tx, rx] = channel(5)
+const { reader, writer }  = channel(5)
 ```
 
-## send
+## Writer<T>
 
-The following code create a unbounded channel and sends the values `1, 2, 3` following by a `null`. The `null` is a signal to the receiver that the stream of values has finished. A `null` value will cause the `for await-of` block to finish.
+The following code create a unbounded channel and sends the values `1, 2, 3` following by call to `end()` signalling to a reader `EOF`.
 
 ```typescript
-const [tx, rx] = channel()
+const { reader, writer } = channel<number>()
 
-tx.send(1)
-tx.send(2)
-tx.send(3)
-tx.send(null)
+writer.write(1)
+writer.write(2)
+writer.write(3)
+writer.end()
 
 ```
 
-## receive
+## Reader<T>
 
-The `Receiver<T>` side of a channel supports `for-await-of` for general iteration. 
-
-```typescript
-const [tx, rx] = channel()
-tx.send(1)
-tx.send(2)
-tx.send(3)
-tx.send(null)
-
-for await (const n of rx) {
-  console.log(n)
-}
-```
-But also provides many `linq` / `RxJs` inspired operators on the receiver.
+The `Reader<T>` is the receiving side of a channel and supports `for-await-of` for general iteration. 
 
 ```typescript
-const [tx, rx] = channel()
-tx.send(1)
-tx.send(2)
-tx.send(3)
-tx.send(null)
+const { reader, writer } = channel()
+writer.write(1)
+writer.write(2)
+writer.write(3)
+writer.end()
 
-for await (const n of rx.filter(n => n % 2 === 0)
-                         .map(n => '#' + n)
-                         .reverse()) {
-  console.log(n)
+for await (const value of reader) {
+  console.log(value)
 }
 
 ```
 
 ## bounded vs unbounded
 
-By default all channels are `unbounded` but it is possible to set a fixed buffering size when creating a `channel()`. When setting a channel size, this will cause a sender to `await` when sending values. The `await` at the sender will only occur once the channel has filled up with values. The sender will remained suspended until such time a receiver starts pulling values from the channel.
+By default all channels are `unbounded` but it is possible to set a fixed buffering size when creating a `channel()`. When setting a channel size, this will cause a writer to pause at `await` when sending values. The `await` at the writer will only occur once the channels buffer has filled with values. The writer will remained suspended until such time a receiver starts pulling values from the channel.
 
 The following code demostrates this behavior with channel bound to a buffer of 5.
 
 ```typescript
-const [tx, rx] = channel(5)
-await tx.send(0) // 1
-await tx.send(1) // 2
-await tx.send(2) // 3
-await tx.send(3) // 4
-await tx.send(4) // 5 - at capacity
+const { reader, writer } = channel(5)
+await writer.write(0) // 1
+await writer.write(1) // 2
+await writer.write(2) // 3
+await writer.write(3) // 4
+await writer.write(4) // 5 - at capacity, the reader will need to read something.
 
-await tx.send(5) // suspend  <-----+
-                 //                |
-...              //                |- rx.next() resumes the suspended tx.send() 
-                 //                |
-rx.next()        // resume   ------+
+await writer.write(5) // paused   <------
+                      //                | - reader.read() dequeues one element from the
+...                   //                |   stream which will cause the writer to resume.
+                      //                |  
+reader.read()         // resume   ------>
 ```
 
-Note, this behaviour is intended to ease back pressure in streaming scenarios where the sender may emit values faster than a receiver can receive them. The behaviour of the `awaitable send` is modelled on the `std::sync::mpsc::SyncSender<T>` type found in the Rust standard library. But rather than blocking, this library leverages await to suspend.
-
-## error handling
-
-A `Sender<T>` can emit a error value with the following..
-
-```typescript
-const [tx, rx] = channel()
-tx.send(3)
-tx.send(2)
-tx.send(1)
-tx.send(new Error('bang'))
-
-```
-This will resolve in a `throw` being raised at the `Receiver<T>`. This can be caught at handled with typical `try/catch` logic.
-
-```typescript
-try {
-  for await (const n of rx) {
-    console.log(n)
-  }
-} catch(error) {
-  console.log(error) 
-}
-
-// prints:
-// 3
-// 2
-// 1
-// error: 'bang'
-```
+Note, this behaviour is intended to ease back pressure in streaming scenarios where the writer may emit values faster than a reader can receive them. The behaviour of the `awaitable send` is modelled on the `std::sync::mpsc::SyncSender<T>` type found in the Rust standard library. But rather than blocking, this library leverages await to suspend.
 
 ## select
 
-This library provides a simple channel `select` function similar to multi channel select found in the Go programming language. It allows multiple `Receiver<T>` types to be combined into a singular stream.
+This library provides a simple channel `select` function similar to multi channel select found in the Go programming language. It allows multiple `Reader<T>` types to be combined into a singular stream.
 
 ```typescript
-import { channel, Receiver, select } from './channels'
+import { channel, select } from './corsa'
 
-// stream an array of strings
+// A stream of strings
 function strings() {
-  const [tx, rx] = channel<string>()
-  setInterval(() => tx.send('hello world'), 100)
-  return rx
+  const { reader, writer } = channel<string>()
+  setInterval(() => writer.write('hello world'), 100)
+  return reader
 }
-// stream an array of numbers
+// A stream of numbers
 function numbers() {
-  const [tx, rx] = channel<number>()
-  setInterval(() => tx.send(Math.random()), 200)
-  return rx
+  const { reader, writer } = channel<number>()
+  setInterval(() => writer.write(Math.random()), 200)
+  return reader
 }
 
 (async () => {

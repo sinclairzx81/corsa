@@ -1,4 +1,4 @@
-mpsc-js
+corsa - Asynchronous uni-directional channels in node using async iteration.
 
 The MIT License (MIT)
 

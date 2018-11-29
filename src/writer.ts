@@ -26,8 +26,23 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-export { IReader, Reader }  from './reader'
-export { IWriter, Writer }  from './writer'
-export { IChannel }         from './channel'
-export { channel }          from './channel'
-export { select }           from './select'
+export interface IWriter<T> {
+  /**
+   * writes this 
+   */
+  write(data: T): Promise<void>
+
+  end(): Promise<void>
+}
+
+export class Writer<T = any> implements IWriter<T> {
+  constructor(private writer: IWriter<T>) {
+  }
+  public write(data: T): Promise<void> {
+    return this.writer.write(data)
+  }
+  public end(): Promise<void> {
+    return this.writer.end()
+  }
+}
+

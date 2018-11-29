@@ -1,3 +1,2 @@
-import './sender'
-import './receiver'
-import './queryable'
+import './writer'
+import './reader'

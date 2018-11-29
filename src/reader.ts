@@ -26,8 +26,41 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-export { IReader, Reader }  from './reader'
-export { IWriter, Writer }  from './writer'
-export { IChannel }         from './channel'
-export { channel }          from './channel'
-export { select }           from './select'
+export interface IReader<T = any> {
+  [Symbol.iterator]()
+  [Symbol.asyncIterator]()
+  read(): Promise<T | undefined>
+}
+
+export class ReaderIterator<T = any> implements Iterator<Promise<T>> {
+  constructor(private readonly reader: IReader<T>) { }
+  public next(): IteratorResult<Promise<T>> {
+    const value = this.reader.read()
+    const done  = false
+    return { value, done }
+  }
+}
+
+export class ReaderAsyncIterator<T = any> implements AsyncIterator<T> {
+  constructor(private readonly reader: IReader<T>) { }
+  public async next(): Promise<IteratorResult<T>> {
+    const next = await this.reader.read()
+    if (next === undefined) {
+      const done  = true
+      const value = null
+      return { done, value }
+    }
+    const done  = false
+    const value = next
+    return { done, value }
+  }
+}
+
+export class Reader<T = any> implements IReader<T> {
+  [Symbol.iterator]()      { return new ReaderIterator(this) }
+  [Symbol.asyncIterator]() { return new ReaderAsyncIterator(this) }
+  constructor(private readonly reader: IReader<T>) { }
+  public read(): Promise<T | undefined> {
+    return this.reader.read()
+  }
+}

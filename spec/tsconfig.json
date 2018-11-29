@@ -1,10 +1,13 @@
 {
   "compilerOptions": {
-    "module":           "amd",
-    "outFile":          "../spec.js",
+    "module": "amd",
+    "target": "esnext",
+    "outFile": "../spec.js",
     "moduleResolution": "node",
-    "removeComments":   true,
-    "lib":              ["es2015", "dom", "esnext.asynciterable"]
+    "removeComments": true,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "lib": ["es2015", "dom", "esnext.asynciterable"]
   },
   "files": ["index.ts"]
 }
