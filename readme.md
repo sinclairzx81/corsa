@@ -106,13 +106,12 @@ This library provides a simple channel `select` function similar to multi channe
 ```typescript
 import { channel, select } from './corsa'
 
-// A stream of strings
 function strings() {
   const { reader, writer } = channel<string>()
   setInterval(() => writer.write('hello world'), 100)
   return reader
 }
-// A stream of numbers
+
 function numbers() {
   const { reader, writer } = channel<number>()
   setInterval(() => writer.write(Math.random()), 200)
