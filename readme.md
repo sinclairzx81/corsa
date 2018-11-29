@@ -1,4 +1,4 @@
-# Corsa
+# corsa
 
 Asynchronous uni-directional channels in node using async iteration.
 
