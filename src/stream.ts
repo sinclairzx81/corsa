@@ -31,9 +31,7 @@ import { ReaderAsyncIterator } from './reader'
 import { ReaderIterator }      from './reader'
 import { IWriter }             from './writer'
 
-const move = (func: Function) => func()
-
-interface Defer<T> {
+interface Defer<T = any> {
   resolve: (value: T)     => void
   reject:  (error: Error) => void
 }
@@ -49,49 +47,37 @@ export class Stream<T = any> implements IReader<T>, IWriter<T> {
   [Symbol.iterator]()      { return new ReaderIterator(this) }
   [Symbol.asyncIterator]() { return new ReaderAsyncIterator(this) }
 
-  private buffer: T[]                      = []
-  private writers: Array<Defer<undefined>> = []
-  private readers: Array<Defer<T>>         = []
+  private writers: Array<Defer>     = []
+  private sinks:   Array<Defer<T>>  = []
+  private queue:   T[]              = []
 
   constructor(private bounds: number = 1) {}
   
   /** writes the given value to the stream. */
-  public write (value: T): Promise<void> {
-    return new Promise<void>(resolve => {
-      move(async () => {
-        if (this.buffer.length >= this.bounds) {
-          await this.writePause()
-          this.readResume(value)
-          resolve()
-          return
-        }
-        this.readResume(value)
-        resolve()
-      })
-    })
+  public async write (value: T): Promise<void> {
+    if (this.queue.length >= this.bounds) {
+      await this.writePause()
+      this.readResume(value)
+      return
+    }
+    this.readResume(value)
   }
 
   /** ends this stream. */
-  public end (): Promise<void> {
-    return new Promise<void>(resolve => {
-      move(async () => {
-        if (this.buffer.length >= this.bounds) {
-          await this.writePause()
-          this.readResume(undefined)
-          resolve()
-        } else {
-          this.readResume(undefined)
-          resolve()
-        }
-      })
-    })
+  public async end (): Promise<void> {
+    if (this.queue.length >= this.bounds) {
+      await this.writePause()
+      this.readResume(void 0)
+    } else {
+      this.readResume(void 0)
+    }
   }
 
   /** reads one element from the stream. */
   public read (): Promise<T> {
     this.writeResume()
-    if (this.buffer.length > 0) {
-      return Promise.resolve(this.buffer.shift()!)
+    if (this.queue.length > 0) {
+      return Promise.resolve(this.queue.shift()!)
     } else {
       return this.readPause()
     }
@@ -106,22 +92,21 @@ export class Stream<T = any> implements IReader<T>, IWriter<T> {
   private writeResume() {
     if (this.writers.length > 0) {
       const writer = this.writers.shift()!
-      writer.resolve(undefined)
+      writer.resolve(void 0)
     }    
   }
 
   private readPause() {
     return new Promise<T>((resolve, reject) => {
-      this.readers.push({ resolve, reject })
+      this.sinks.push({ resolve, reject })
     })
   }
 
-  private readResume (item: T) {
-    if (this.readers.length > 0) {
-      const reader = this.readers.shift()!
-      reader.resolve(item)
-      return
+  private readResume (value: T) {
+    if (this.sinks.length > 0) {
+      const sink = this.sinks.shift()!
+      return sink.resolve(value)
     }
-    this.buffer.push(item)
+    this.queue.push(value)
   }
 }
