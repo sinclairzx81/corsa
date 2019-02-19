@@ -26,114 +26,114 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { IReader } from './reader'
-import { channel } from './channel'
+import { IReadable } from './readable'
+import { channel }   from './channel'
 
 /**
- * Selects from the given IReader<T> types and produces a
- * new multiplexed IReader<T> merging elements for each.
+ * Selects from the given IReadable<T> types and produces a
+ * new multiplexed IReadable<T> merging elements for each.
  */
 export function select<T1, T2, T3, T4, T5, T6, T7, T8>(
-  r1: IReader<T1>,
-  r2: IReader<T2>,
-  r3: IReader<T3>,
-  r4: IReader<T4>,
-  r5: IReader<T5>,
-  r6: IReader<T6>,
-  r7: IReader<T7>,
-  r8: IReader<T8>
-): IReader<T1 | T2 | T3 | T4 | T5 | T6 | T7>
+  r1: IReadable<T1>,
+  r2: IReadable<T2>,
+  r3: IReadable<T3>,
+  r4: IReadable<T4>,
+  r5: IReadable<T5>,
+  r6: IReadable<T6>,
+  r7: IReadable<T7>,
+  r8: IReadable<T8>
+): IReadable<T1 | T2 | T3 | T4 | T5 | T6 | T7>
 
 /**
- * Selects from the given IReader<T> types and produces a
- * new multiplexed IReader<T> merging elements for each.
+ * Selects from the given IReadable<T> types and produces a
+ * new multiplexed IReadable<T> merging elements for each.
  */
 export function select<T1, T2, T3, T4, T5, T6, T7>(
-  r1: IReader<T1>,
-  r2: IReader<T2>,
-  r3: IReader<T3>,
-  r4: IReader<T4>,
-  r5: IReader<T5>,
-  r6: IReader<T6>,
-  r7: IReader<T7>
-): IReader<T1 | T2 | T3 | T4 | T5 | T6 | T7>
+  r1: IReadable<T1>,
+  r2: IReadable<T2>,
+  r3: IReadable<T3>,
+  r4: IReadable<T4>,
+  r5: IReadable<T5>,
+  r6: IReadable<T6>,
+  r7: IReadable<T7>
+): IReadable<T1 | T2 | T3 | T4 | T5 | T6 | T7>
 
 /**
- * Selects from the given IReader<T> types and produces a
- * new multiplexed IReader<T> merging elements for each.
+ * Selects from the given IReadable<T> types and produces a
+ * new multiplexed IReadable<T> merging elements for each.
  */
 export function select<T1, T2, T3, T4, T5, T6>(
-  r1: IReader<T1>,
-  r2: IReader<T2>,
-  r3: IReader<T3>,
-  r4: IReader<T4>,
-  r5: IReader<T5>,
-  r6: IReader<T6>
-): IReader<T1 | T2 | T3 | T4 | T5 | T6>
+  r1: IReadable<T1>,
+  r2: IReadable<T2>,
+  r3: IReadable<T3>,
+  r4: IReadable<T4>,
+  r5: IReadable<T5>,
+  r6: IReadable<T6>
+): IReadable<T1 | T2 | T3 | T4 | T5 | T6>
 
 /**
- * Selects from the given IReader<T> types and produces a
- * new multiplexed IReader<T> merging elements for each.
+ * Selects from the given IReadable<T> types and produces a
+ * new multiplexed IReadable<T> merging elements for each.
  */
 export function select<T1, T2, T3, T4, T5>(
-  r1: IReader<T1>,
-  r2: IReader<T2>,
-  r3: IReader<T3>,
-  r4: IReader<T4>,
-  r5: IReader<T5>
-): IReader<T1 | T2 | T3 | T4 | T5>
+  r1: IReadable<T1>,
+  r2: IReadable<T2>,
+  r3: IReadable<T3>,
+  r4: IReadable<T4>,
+  r5: IReadable<T5>
+): IReadable<T1 | T2 | T3 | T4 | T5>
 
 /**
- * Selects from the given IReader<T> types and produces a
- * new multiplexed IReader<T> merging elements for each.
+ * Selects from the given IReadable<T> types and produces a
+ * new multiplexed IReadable<T> merging elements for each.
  */
 export function select<T1, T2, T3, T4>(
-  r1: IReader<T1>,
-  r2: IReader<T2>,
-  r3: IReader<T3>,
-  r4: IReader<T4>
-): IReader<T1 | T2 | T3 | T4>
+  r1: IReadable<T1>,
+  r2: IReadable<T2>,
+  r3: IReadable<T3>,
+  r4: IReadable<T4>
+): IReadable<T1 | T2 | T3 | T4>
 
 /**
- * Selects from the given IReader<T> types and produces a
- * new multiplexed IReader<T> merging elements for each.
+ * Selects from the given IReadable<T> types and produces a
+ * new multiplexed IReadable<T> merging elements for each.
  */
 export function select<T1, T2, T3>(
-  r1: IReader<T1>,
-  r2: IReader<T2>,
-  r3: IReader<T3>
-): IReader<T1 | T2 | T3>
+  r1: IReadable<T1>,
+  r2: IReadable<T2>,
+  r3: IReadable<T3>
+): IReadable<T1 | T2 | T3>
 
 /**
- * Selects from the given IReader<T> types and produces a multiplexed
- * IReader<T> combining elements for each.
+ * Selects from the given IReadable<T> types and produces a multiplexed
+ * IReadable<T> combining elements for each.
  */
 export function select<T1, T2>(
-  r1: IReader<T1>,
-  r2: IReader<T2>
-): IReader<T1 | T2>
+  r1: IReadable<T1>,
+  r2: IReadable<T2>
+): IReadable<T1 | T2>
 
 /**
- * Selects from the given IReader<T> types and produces a
- * new multiplexed IReader<T> merging elements for each.
+ * Selects from the given IReadable<T> types and produces a
+ * new multiplexed IReadable<T> merging elements for each.
  */
-export function select<T1>(r1: IReader<T1>): IReader<T1>
+export function select<T1>(r1: IReadable<T1>): IReadable<T1>
 
 /**
- * Selects from the given IReader<T> types and produces a
- * new multiplexed IReader<T> merging elements for each.
+ * Selects from the given IReadable<T> types and produces a
+ * new multiplexed IReadable<T> merging elements for each.
  */
-export function select(...readers: Array<IReader<any>>): IReader<any> {
-  const { writer: writer_main, reader: reader_main } = channel<any>(1)
+export function select(...readers: Array<IReadable<any>>): IReadable<any> {
+  const { writable: writableHost, readable: readableHost } = channel<any>(1)
   let completed = 0
   readers.forEach(async reader => {
     for await (const value of reader as any) {
-      await writer_main.write(value)
+      await writableHost.write(value)
     }
     completed += 1
     if(completed === readers.length) {
-      await writer_main.end()
+      await writableHost.end()
     }
   })
-  return reader_main
+  return readableHost
 }

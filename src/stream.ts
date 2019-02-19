@@ -26,10 +26,10 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { IReader }             from './reader'
-import { ReaderAsyncIterator } from './reader'
-import { ReaderIterator }      from './reader'
-import { IWriter }             from './writer'
+import { IReadable }             from './readable'
+import { ReadableAsyncIterator } from './readable'
+import { ReadableIterator }      from './readable'
+import { IWritable }             from './writable'
 
 interface Defer<T = any> {
   resolve: (value: T)     => void
@@ -40,12 +40,12 @@ interface Defer<T = any> {
  * Stream<T>
  * 
  * An in-memory asynchronous stream of values. Implements both
- * IReader<T> and IWriter<T> interfaces and is used as a back
+ * IReadable<T> and IWritable<T> interfaces and is used as a back
  * plane for in memory channels.
  */
-export class Stream<T = any> implements IReader<T>, IWriter<T> {
-  [Symbol.iterator]()      { return new ReaderIterator(this) }
-  [Symbol.asyncIterator]() { return new ReaderAsyncIterator(this) }
+export class Stream<T = any> implements IReadable<T>, IWritable<T> {
+  [Symbol.iterator]()      { return new ReadableIterator(this) }
+  [Symbol.asyncIterator]() { return new ReadableAsyncIterator(this) }
 
   private writers: Array<Defer>     = []
   private sinks:   Array<Defer<T>>  = []

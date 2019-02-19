@@ -26,18 +26,17 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { Reader, IReader }     from './reader'
-import { Writer, IWriter }     from './writer'
+import { IReadable, Readable } from './readable'
+import { IWritable, Writable } from './writable'
 import { Stream }              from './stream'
 
 export interface IChannel<T = any> {
-  reader: IReader<T>
-  writer: IWriter<T>
+  readable: IReadable<T>
+  writable: IWritable<T>
 }
-
 export function channel<T = any>(bound: number = Number.MAX_SAFE_INTEGER): IChannel<T> {
-  const memory = new Stream<T>(bound)
-  const reader = new Reader<T>(memory)
-  const writer = new Writer<T>(memory)
-  return { reader, writer }
+  const memory   = new Stream<T>(bound)
+  const readable = new Readable<T>(memory)
+  const writable = new Writable<T>(memory)
+  return { readable, writable }
 }

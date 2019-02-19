@@ -27,7 +27,7 @@
     "smoke-task": "^1.0.5",
     "tslint": "^5.10.0",
     "typescript": "^3.2.1",
-    "typescript-bundle": "^0.8.6"
+    "typescript-bundle": "^1.0.11"
   },
   "dependencies": {
     "@types/uuid": "^3.4.4",

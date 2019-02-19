@@ -26,8 +26,7 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-export { IReader, Reader }  from './reader'
-export { IWriter, Writer }  from './writer'
-export { IChannel }         from './channel'
-export { channel }          from './channel'
-export { select }           from './select'
+export { IReadable, Readable } from './readable'
+export { IWritable, Writable } from './writable'
+export { IChannel, channel }   from './channel'
+export { select }              from './select'

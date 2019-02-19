@@ -1,2 +1,2 @@
-import './writer'
-import './reader'
+import './writable'
+import './readable'

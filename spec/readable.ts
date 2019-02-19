@@ -1,35 +1,35 @@
-import { channel } from "../src/index"
-import { expect } from "chai"
+import { channel } from '../src'
+import { expect }  from 'chai'
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-const move = (func: Function) => func()
+const move  = (func: Function) => func()
 
-describe('Reader<T>', () => {
+describe('Readable<T>', () => {
   it('should recv values (unbounded, manual)', async () => {
-    const { writer, reader } = channel()
-    writer.write(1)
-    writer.write(2)
-    writer.write(3)
-    writer.end()
+    const { writable, readable } = channel()
+    writable.write(1)
+    writable.write(2)
+    writable.write(3)
+    writable.end()
 
     const result = await Promise.all([
-      reader.read(),
-      reader.read(),
-      reader.read(),
-      reader.read()
+      readable.read(),
+      readable.read(),
+      readable.read(),
+      readable.read()
     ])
     expect(result).to.be.deep.eq([1, 2, 3, undefined])
   })
 
   it('should recv values (unbounded, for-await-of)', async () => {
-    const { writer, reader } = channel()
-    writer.write(1)
-    writer.write(2)
-    writer.write(3)
-    writer.end()
+    const { writable, readable } = channel()
+    writable.write(1)
+    writable.write(2)
+    writable.write(3)
+    writable.end()
 
     const result = []
-    for await (const value of reader) {
+    for await (const value of readable) {
       result.push(value)
     }
     expect(result).to.be.deep.eq([1, 2, 3])
@@ -37,11 +37,11 @@ describe('Reader<T>', () => {
 
   it('should recv values (unbounded, for-await-of, read-first)', async () => {
     return new Promise((resolve, _) => {
-      const { writer, reader } = channel()
+      const { writable, readable } = channel()
       // read
       move(async() => {
         const result = []
-        for await (const value of reader) {
+        for await (const value of readable) {
           result.push(value)
         }
         expect(result).to.be.deep.eq([1, 2, 3])
@@ -49,29 +49,29 @@ describe('Reader<T>', () => {
       })
       // write
       move(async () => {
-        writer.write(1)
-        writer.write(2)
-        writer.write(3)
-        writer.end()
+        writable.write(1)
+        writable.write(2)
+        writable.write(3)
+        writable.end()
       })
     })
   })
 
   it('should recv values (unbounded, for-await-of, write-first)', async () => {
     return new Promise((resolve, _) => {
-      const { writer, reader } = channel()
+      const { writable, readable } = channel()
       // write
       move(async () => {
-        writer.write(1)
-        writer.write(2)
-        writer.write(3)
-        writer.end()
+        writable.write(1)
+        writable.write(2)
+        writable.write(3)
+        writable.end()
       })
 
       // read
       move(async() => {
         const result = []
-        for await (const value of reader) {
+        for await (const value of readable) {
           result.push(value)
         }
         expect(result).to.be.deep.eq([1, 2, 3])
@@ -81,30 +81,30 @@ describe('Reader<T>', () => {
   })
 
   it('should recv values (bounded, manual)', async () => {
-    const { writer, reader } = channel(4)
-    await writer.write(1)
-    await writer.write(2)
-    await writer.write(3)
-    await writer.end()
+    const { writable, readable } = channel(4)
+    await writable.write(1)
+    await writable.write(2)
+    await writable.write(3)
+    await writable.end()
 
     const result = await Promise.all([
-      reader.read(),
-      reader.read(),
-      reader.read(),
-      reader.read(),
+      readable.read(),
+      readable.read(),
+      readable.read(),
+      readable.read(),
     ])
     expect(result).to.be.deep.eq([1, 2, 3, undefined])
   })
 
   it('should recv values (bounded, for-await-of)', async () => {
-    const { writer, reader } = channel(4)
-    await writer.write(1)
-    await writer.write(2)
-    await writer.write(3)
-    await writer.end()
+    const { writable, readable } = channel(4)
+    await writable.write(1)
+    await writable.write(2)
+    await writable.write(3)
+    await writable.end()
 
     const result = []
-    for await (const value of reader) {
+    for await (const value of readable) {
       result.push(value)
     }
     expect(result).to.be.deep.eq([1, 2, 3])
@@ -112,11 +112,11 @@ describe('Reader<T>', () => {
 
   it('should recv values (bounded, for-await-of, read-first)', async () => {
     return new Promise((resolve, _) => {
-      const { writer, reader } = channel(4)
+      const { writable, readable } = channel(4)
       // read
       move(async() => {
         const result = []
-        for await (const value of reader) {
+        for await (const value of readable) {
           result.push(value)
         }
         expect(result).to.be.deep.eq([1, 2, 3])
@@ -124,29 +124,29 @@ describe('Reader<T>', () => {
       })
       // write
       move(async () => {
-        await writer.write(1)
-        await writer.write(2)
-        await writer.write(3)
-        await writer.end()
+        await writable.write(1)
+        await writable.write(2)
+        await writable.write(3)
+        await writable.end()
       })
     })
   })
 
   it('should recv values (bounded, for-await-of, write-first)', async () => {
     return new Promise((resolve, _) => {
-      const { writer, reader } = channel(4)
+      const { writable, readable } = channel(4)
       // write
       move(async () => {
-        await writer.write(1)
-        await writer.write(2)
-        await writer.write(3)
-        await writer.end()
+        await writable.write(1)
+        await writable.write(2)
+        await writable.write(3)
+        await writable.end()
       })
 
       // read
       move(async() => {
         const result = []
-        for await (const value of reader) {
+        for await (const value of readable) {
           result.push(value)
         }
         expect(result).to.be.deep.eq([1, 2, 3])
@@ -157,27 +157,27 @@ describe('Reader<T>', () => {
 
   it('should track state during iteration (bounded(1), manual)', async () => {
     return new Promise(async (resolve, reject) => {
-      const { writer, reader } = channel(1)
+      const { writable, readable } = channel(1)
       let state = 0
       move(async () => {
-        await writer.write(1)   
+        await writable.write(1)   
         state = 1
-        await writer.write(2) 
+        await writable.write(2) 
         state = 2
-        await writer.write(3)
+        await writable.write(3)
         state = 3
       })
       
       // defer to allow move entry.
       setTimeout(async () => {
         expect(state).to.be.eq(1)
-        await reader.read() // read: 1
+        await readable.read() // read: 1
         await delay(1)
         expect(state).to.be.eq(2)
-        await reader.read() // read: 2
+        await readable.read() // read: 2
         await delay(1)
         expect(state).to.be.eq(3)
-        await reader.read() // read: 3
+        await readable.read() // read: 3
         await delay(1)
         resolve()
       })

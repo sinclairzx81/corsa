@@ -26,23 +26,41 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-export interface IWriter<T> {
-  /**
-   * writes this 
-   */
-  write(data: T): Promise<void>
-
-  end(): Promise<void>
+export interface IReadable<T = any> {
+  [Symbol.iterator]()
+  [Symbol.asyncIterator]()
+  read(): Promise<T | undefined>
 }
 
-export class Writer<T = any> implements IWriter<T> {
-  constructor(private writer: IWriter<T>) {
-  }
-  public write(data: T): Promise<void> {
-    return this.writer.write(data)
-  }
-  public end(): Promise<void> {
-    return this.writer.end()
+export class ReadableIterator<T = any> implements Iterator<Promise<T>> {
+  constructor(private readonly readable: IReadable<T>) { }
+  public next(): IteratorResult<Promise<T>> {
+    const value = this.readable.read()
+    const done  = false
+    return { value, done }
   }
 }
 
+export class ReadableAsyncIterator<T = any> implements AsyncIterator<T> {
+  constructor(private readonly readable: IReadable<T>) { }
+  public async next(): Promise<IteratorResult<T>> {
+    const next = await this.readable.read()
+    if (next === undefined) {
+      const done  = true
+      const value = null
+      return { done, value }
+    }
+    const done  = false
+    const value = next
+    return { done, value }
+  }
+}
+
+export class Readable<T = any> implements IReadable<T> {
+  [Symbol.iterator]()      { return new ReadableIterator(this) }
+  [Symbol.asyncIterator]() { return new ReadableAsyncIterator(this) }
+  constructor(private readonly reader: IReadable<T>) { }
+  public read(): Promise<T | undefined> {
+    return this.reader.read()
+  }
+}

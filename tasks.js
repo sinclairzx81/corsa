@@ -8,17 +8,16 @@ export async function clean() {
 }
 
 export async function start() {
-  await shell('tsc-bundle --project ./src/tsconfig.json')
+  await shell('tsc-bundle ./src/tsconfig.json --outFile ./index.js')
   await Promise.all([
-    shell(`tsc-bundle --project ./src/tsconfig.json --watch > /dev/null`),
+    shell(`tsc-bundle ./src/tsconfig.json --outFile ./index.js --watch > /dev/null`),
     shell('fsrun ./index.js [node index.js]')
   ])
 }
 
 export async function test() {
-  await shell('npm install')
-  await shell('tsc-bundle --project ./spec/tsconfig.json')
-  await shell('mocha ./spec.js')
+  await shell('tsc-bundle ./spec/tsconfig.json --outFile ./test.js')
+  await shell('mocha ./test.js')
 }
 
 export async function lint() {
@@ -26,7 +25,7 @@ export async function lint() {
 }
 
 export async function build() {
-  await shell('tsc-bundle --project ./src/tsconfig.json')
+  await shell('tsc-bundle ./src/tsconfig.json')
   await shell(`shx rm   -rf ./bin`)
   await shell(`shx mkdir -p ./bin`)
   await shell(`shx cp ./index.js     ./bin/index.js`)
