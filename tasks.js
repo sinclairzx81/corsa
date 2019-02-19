@@ -24,5 +24,4 @@ export async function pack() {
   await shell('shx cp readme.md    public/pack')
   await shell('shx cp license      public/pack')
   await shell('cd public/pack && npm pack')
-  
 }

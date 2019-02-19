@@ -4,6 +4,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "removeComments": false,
+    "declaration": true,
     "lib": ["esnext", "dom"]
   },
   "files": ["index.ts"]

@@ -2,8 +2,6 @@
 
  [![Build Status](https://travis-ci.org/sinclairzx81/corsa.svg?branch=master)](https://travis-ci.org/sinclairzx81/corsa)
 
-
-
 # Corsa
 
 Async iteration channels in JavaScript.
@@ -37,6 +35,8 @@ output:
 Corsa is a library for creating buffered readable / writable channels in JavaScript. This library was specifically written to help solve backpressure issues that can occur when dealing with high frequency messaging using traditional event listeners in JavaScript.
 
 Corsa approaches this problem by making the channels sender await and suspend at buffer capacity. This helps to ensure the senders send rate is locked to the throughput allowed by a receiver.
+
+Requires async/await and AsyncIteration support. Tested natively on Node v10.
 
 ## channel&lt;T&gt;
 
