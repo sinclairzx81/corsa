@@ -1,5 +1,6 @@
 ![logo](./docs/logo.png)
 
+[![NPM package](https://badge.fury.io/js/corsa.svg)](https://www.npmjs.com/package/corsa) 
  [![Build Status](https://travis-ci.org/sinclairzx81/corsa.svg?branch=master)](https://travis-ci.org/sinclairzx81/corsa)
 
 # Corsa
