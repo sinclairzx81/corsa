@@ -1,7 +1,7 @@
 export async function clean() {
   await shell('shx rm -rf ./bin')
   await shell('shx rm -rf ./index.js')
-  await shell('shx rm -rf ./spec.js')
+  await shell('shx rm -rf ./test.js')
   await shell('shx rm -rf ./package-lock.json')
   await shell('shx rm -rf ./node_modules')
   

@@ -8,7 +8,7 @@ Asynchronous uni-directional channels in JavaScript using async iteration.
 
 import { channel } from 'corsa'
 
-const [ writable, readable ] = channel()
+const { readable, writable } = channel()
 writable.write(3)
 writable.write(2)
 writable.write(1)
@@ -38,12 +38,12 @@ Corsa approaches this problem by making the `sender` side of a `channel` awaitab
 A channel is a uni-directional pipe for which data can flow. The following code creates an `unbounded` channel which allows for near infinite buffering of messages between `writable` and `readable`. The call to channel returns a `channel` object, which we destructure into the readable and writable pairs.
 
 ```typescript
-const [ writable, readable ] = channel()
+const { readable, writable } = channel()
 ```
 The following creates a bounded channel which allows for sending `5` values before suspending (see bounded vs unbounded)
 
 ```typescript
-const [ writable, readable ]  = channel(5)
+const { readable, writable }  = channel(5)
 ```
 
 ## Writer&lt;T&gt;
@@ -51,7 +51,7 @@ const [ writable, readable ]  = channel(5)
 The following code create a unbounded channel and sends the values `1, 2, 3` following by call to `end()` signalling to a readable `EOF`.
 
 ```typescript
-const [ writable, readable ] = channel<number>()
+const { readable, writable } = channel<number>()
 
 writable.write(1)
 writable.write(2)
@@ -65,7 +65,7 @@ writable.end()
 The `Reader<T>` is the receiving side of a channel and supports `for-await-of` for general iteration. 
 
 ```typescript
-const [ writable, readable ] = channel()
+const { readable, writable } = channel()
 writable.write(1)
 writable.write(2)
 writable.write(3)
@@ -84,7 +84,7 @@ By default all channels are `unbounded` but it is possible to set a fixed buffer
 The following code demostrates this behavior with channel bound to a buffer of 5.
 
 ```typescript
-const [ writable, readable ] = channel(5)
+const { readable, writable } = channel(5)
 await writable.write(1) 
 await writable.write(2) 
 await writable.write(3) 
@@ -106,13 +106,13 @@ This library provides a simple channel `select` function similar to multi channe
 import { channel, select } from 'corsa'
 
 function strings() {
-  const [ writable, readable ] = channel<string>()
+  const { readable, writable } = channel<string>()
   setInterval(() => writable.write('hello world'), 100)
   return readable
 }
 
 function numbers() {
-  const [ writable, readable ] = channel<number>()
+  const { readable, writable } = channel<number>()
   setInterval(() => writable.write(Math.random()), 200)
   return readable
 }
