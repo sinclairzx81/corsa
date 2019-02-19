@@ -2,16 +2,15 @@
 
  [![Build Status](https://travis-ci.org/sinclairzx81/corsa.svg?branch=master)](https://travis-ci.org/sinclairzx81/corsa)
 
-```
-$ npm install corsa --save
-```
+
 
 # Corsa
 
 Async iteration channels in JavaScript.
-
+```
+$ npm install corsa --save
+```
 ```typescript
-
 import { channel } from 'corsa'
 
 const { readable, writable } = channel()
