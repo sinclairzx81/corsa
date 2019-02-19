@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "description": "asynchronous channels in node",
   "scripts": {
-    "clean": "node tasks clean",
-    "start": "node tasks start",
-    "build": "node tasks build",
-    "spec": "node tasks spec",
-    "test": "npm run spec",
+    "clean": "smoke-task clean",
+    "start": "smoke-task start",
+    "build": "smoke-task build",
+    "test": "smoke-task test",
     "lint": "node tasks lint"
   },
   "repository": {
@@ -25,6 +24,7 @@
     "fsrun": "^0.9.4",
     "mocha": "^5.2.0",
     "shx": "^0.2.2",
+    "smoke-task": "^1.0.5",
     "tslint": "^5.10.0",
     "typescript": "^3.2.1",
     "typescript-bundle": "^0.8.6"
