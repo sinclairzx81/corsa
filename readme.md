@@ -1,11 +1,10 @@
-![logo](./docs/logo.png)
+# Corsa
+
+Async iteration channels in JavaScript.
 
 [![NPM package](https://badge.fury.io/js/corsa.svg)](https://www.npmjs.com/package/corsa) 
  [![Build Status](https://travis-ci.org/sinclairzx81/corsa.svg?branch=master)](https://travis-ci.org/sinclairzx81/corsa)
 
-# Corsa
-
-Async iteration channels in JavaScript.
 ```
 $ npm install corsa --save
 ```
@@ -54,7 +53,7 @@ const { readable, writable }  = channel(5)
 
 ## Writer&lt;T&gt;
 
-The following code create a unbounded channel and sends the values `1, 2, 3` following by call to `end()` signalling to a readable `EOF`.
+The following code creates an unbounded channel and sends the values `1, 2, 3` followed by a call to `end()` to signal `EOF` to a receiver.
 
 ```typescript
 const { readable, writable } = channel<number>()
