@@ -34,9 +34,9 @@ output:
 
 ## Overview
 
-Corsa is a library to create asynchronous readable / writable channels in JavaScript. This library was specifically written to help solve `fast-in` | `slow-out` backpressure issues that can occur at high messaging frequencies using traditional event listeners in JavaScript.
+Corsa is a library for creating buffered readable / writable channels in JavaScript. This library was specifically written to help solve backpressure issues that can occur when dealing with high frequency messaging using traditional event listeners in JavaScript.
 
-Corsa approaches this problem by making the `sender` side of a `channel` awaitable. This helps to ensure the senders send rate is locked to the throughput allowed by the `receiver`.
+Corsa approaches this problem by making the channels sender await and suspend at buffer capacity. This helps to ensure the senders send rate is locked to the throughput allowed by a receiver.
 
 ## channel&lt;T&gt;
 
