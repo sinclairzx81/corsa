@@ -1,8 +1,14 @@
 ![logo](./docs/logo.png)
 
+ [![Build Status](https://travis-ci.org/sinclairzx81/corsa.svg?branch=master)](https://travis-ci.org/sinclairzx81/corsa)
+
+```
+$ npm install corsa --save
+```
+
 # Corsa
 
-Asynchronous uni-directional channels in JavaScript using async iteration.
+Async iteration channels in JavaScript.
 
 ```typescript
 

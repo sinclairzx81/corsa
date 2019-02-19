@@ -3,7 +3,7 @@
     "target": "esnext",
     "module": "commonjs",
     "moduleResolution": "node",
-    "removeComments": true,
+    "removeComments": false,
     "lib": ["esnext", "dom"]
   },
   "files": ["index.ts"]

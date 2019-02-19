@@ -1,5 +1,5 @@
-import { channel } from '../src'
 import { expect }  from 'chai'
+import { channel } from '../src'
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const move  = (func: Function) => func()
