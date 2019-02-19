@@ -58,7 +58,7 @@ export class Readable<T = any> implements IReadable<T> {
   [Symbol.iterator]()      { return new ReadableIterator(this) }
   [Symbol.asyncIterator]() { return new ReadableAsyncIterator(this) }
   constructor(private readonly reader: IReadable<T>) { }
-  /** Reads the next value from this channel or `undefined` if end. */
+  /** Reads the next value from this channel or `undefined` if eof. */
   public read(): Promise<T | undefined> {
     return this.reader.read()
   }
@@ -67,7 +67,7 @@ export class Readable<T = any> implements IReadable<T> {
 
 
 export interface IWritable<T=any> {
-  /** Writes this data to the channel. */
+  /** Writes data to the channel. */
   write(data: T): Promise<void>
 
   /** Ends this channel. */
@@ -77,7 +77,7 @@ export interface IWritable<T=any> {
 export class Writable<T = any> implements IWritable<T> {
   constructor(private writer: IWritable<T>) {
   }
-  /** Writes this data to the channel. */
+  /** Writes data to the channel. */
   public write(data: T): Promise<void> {
     return this.writer.write(data)
   }
@@ -112,7 +112,7 @@ export class Stream<T = any> implements IReadable<T>, IWritable<T> {
 
   constructor(private bounds: number = 1) {}
   
-  /** writes the given value to the stream. */
+  /** Writes data to the channel. */
   public async write (value: T): Promise<void> {
     if (this.queue.length >= this.bounds) {
       await this.writePause()
@@ -122,7 +122,7 @@ export class Stream<T = any> implements IReadable<T>, IWritable<T> {
     this.readResume(value)
   }
 
-  /** ends this stream. */
+  /** Ends this stream. */
   public async end (): Promise<void> {
     if (this.queue.length >= this.bounds) {
       await this.writePause()
@@ -132,7 +132,7 @@ export class Stream<T = any> implements IReadable<T>, IWritable<T> {
     }
   }
 
-  /** reads one element from the stream. */
+  /** Reads the next value from this channel or `undefined` if eof. */
   public read (): Promise<T> {
     this.writeResume()
     if (this.queue.length > 0) {
@@ -285,7 +285,7 @@ export interface IChannel<T = any> {
   readable: IReadable<T>
   writable: IWritable<T>
 }
-/** Creates a new channel with optional buffering bounds. (default is Number.MAX_SAFE_INTEGER) */
+/** Creates a channel with optional buffering bounds. (default is Number.MAX_SAFE_INTEGER) */
 export function channel<T = any>(bound: number = Number.MAX_SAFE_INTEGER): IChannel<T> {
   const stream   = new Stream<T>(bound)
   const readable = new Readable<T>(stream)

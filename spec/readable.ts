@@ -11,7 +11,6 @@ describe('Readable<T>', () => {
     writable.write(2)
     writable.write(3)
     writable.end()
-
     const result = await Promise.all([
       readable.read(),
       readable.read(),
