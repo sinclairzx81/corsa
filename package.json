@@ -4,6 +4,7 @@
   "description": "Async iteration channels in JavaScript.",
   "author": "sinclairzx81",
   "license": "MIT",
+  "keywords": ["async-iterators", "channels", "streams", "backpressure"],
   "repository": {
     "type": "git",
     "url": "https://github.com/sinclairzx81/corsa"
