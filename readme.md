@@ -6,17 +6,19 @@
 ╚██████╗╚██████╔╝██║  ██║███████║██║  ██║
  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
                                          
-Asynchronous channels in JavaScript
+  Asynchronous channels in JavaScript
 ```
-
-
-
-[![NPM package](https://badge.fury.io/js/corsa.svg)](https://www.npmjs.com/package/corsa) 
- [![Build Status](https://travis-ci.org/sinclairzx81/corsa.svg?branch=master)](https://travis-ci.org/sinclairzx81/corsa)
 
 ```
 $ npm install corsa --save
 ```
+
+[![NPM package](https://badge.fury.io/js/corsa.svg)](https://www.npmjs.com/package/corsa) 
+ [![Build Status](https://travis-ci.org/sinclairzx81/corsa.svg?branch=master)](https://travis-ci.org/sinclairzx81/corsa)
+
+
+## Example
+
 ```typescript
 import { channel, into } from 'corsa'
 
