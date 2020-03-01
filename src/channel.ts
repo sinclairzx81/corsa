@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------
 
-corsa - asynchronous channels in JavaScript
+Corsa - Asynchronous channels in JavaScript
 
 The MIT License (MIT)
 
