@@ -144,7 +144,7 @@ export class Receiver<T> {
     }
 }
 
-/** Creates an asynchronous channel. Returns a Sender and Receiver pair. */
+/** Creates an asynchronous channel. Returns a Sender and Receiver used to send and receive values on the channel. */
 export function channel<T = any>(): [Sender<T>, Receiver<T>] {
     const [enqueue, dequeue] = queue<T | typeof Eof>()
     const shared = new Shared(Status.OPEN, [])
