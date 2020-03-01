@@ -26,13 +26,13 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-export type Resolver<T> = (value: T) => void
-export type Rejector    = (error: Error) => void
+export type Resolve<T> = (value: T) => void
+export type Reject     = (error: Error) => void
 
 /** Returns a deferred that allows a promise to be resolved externally. */
-export function defer<T>(): [Promise<T>, Resolver<T>, Rejector] {
-    let resolver: Resolver<T>
-    let rejector: Rejector
+export function defer<T>(): [Promise<T>, Resolve<T>, Reject] {
+    let resolver: Resolve<T>
+    let rejector: Reject
     const promise = new Promise<T>((resolve, reject) => {
         resolver = resolve
         rejector = reject

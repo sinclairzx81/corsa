@@ -26,4 +26,5 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
+/** Provides a convenient means to move into a asynchronous context. */
 export const into = <T>(func: () => Promise<T>) => func()

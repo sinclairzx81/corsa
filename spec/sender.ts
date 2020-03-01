@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { channel, into, Eof } from '../src'
+import { channel, into, eof } from '../src'
 
 describe('Sender<T>', () => {
   it('should send one value', async () => {
@@ -61,7 +61,7 @@ describe('Sender<T>', () => {
     expect(b[0]).to.eq(0)
     expect(b[1]).to.eq(1)
     expect(b[2]).to.eq(2)
-    expect(b[3]).to.eq(Eof)
+    expect(b[3]).to.eq(eof)
   })
 
   it('should send many values then end without await', async () => {
@@ -86,7 +86,7 @@ describe('Sender<T>', () => {
     expect(b[0]).to.eq(0)
     expect(b[1]).to.eq(1)
     expect(b[2]).to.eq(2)
-    expect(b[3]).to.eq(Eof)
+    expect(b[3]).to.eq(eof)
   })
 
   it('should send one value but throw (because the receiver ends before receiving any values)', async () => {
@@ -157,9 +157,9 @@ describe('Sender<T>', () => {
     expect(a[1]).to.eq(true)
 
     expect(b[0]).to.eq(0)
-    expect(b[1]).to.eq(Eof)
-    expect(b[2]).to.eq(Eof)
-    expect(b[3]).to.eq(Eof)
+    expect(b[1]).to.eq(eof)
+    expect(b[2]).to.eq(eof)
+    expect(b[3]).to.eq(eof)
   })
 
   it('(non-await) should send first, then end, then throw on second (because the sender ended after the first value was sent)', async () => {
@@ -184,8 +184,8 @@ describe('Sender<T>', () => {
     expect(a[1]).to.eq(true)
 
     expect(b[0]).to.eq(0)
-    expect(b[1]).to.eq(Eof)
-    expect(b[2]).to.eq(Eof)
-    expect(b[3]).to.eq(Eof)
+    expect(b[1]).to.eq(eof)
+    expect(b[2]).to.eq(eof)
+    expect(b[3]).to.eq(eof)
   })
 })

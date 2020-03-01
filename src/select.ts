@@ -26,7 +26,7 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { channel, Eof, Sender, Receiver } from './channel'
+import { channel, eof, Sender, Receiver } from './channel'
 
 /**
  * Selects from the given Receiver<T> types and produces a
@@ -126,7 +126,7 @@ export function select(...sources: Array<Receiver<any>>): Receiver<any> {
     async function receive(sender: Sender<any>, receiver: Receiver<any>) {
         while(true) {
             const next = await receiver.receive()
-            if(next === Eof) {
+            if(next === eof) {
                 return
             }
             await sender.send(next)

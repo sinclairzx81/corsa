@@ -26,8 +26,8 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-export { queue,   Enqueue, Dequeue}        from './queue'
-export { channel, Eof, Sender, Receiver }  from './channel'
+export { queue, Enqueue, Dequeue}        from './queue'
+export { channel, eof, Sender, Receiver }  from './channel'
 export { duplex }                          from './duplex'
 export { select }                          from './select'
 export { into }                            from './into'

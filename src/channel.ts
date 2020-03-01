@@ -26,10 +26,10 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { defer, Resolver, Rejector } from './defer'
+import { defer, Resolve, Reject }  from './defer'
 import { queue, Enqueue, Dequeue } from './queue'
 
-export const Eof = Symbol('Eof')
+export const eof = Symbol('eof')
 
 enum Status {
     ENDED_BY_SENDER,
@@ -37,7 +37,7 @@ enum Status {
     OPEN,
 }
 
-type Deferred<T> = [Resolver<T>, Rejector]
+type Deferred<T> = [Resolve<T>, Reject]
 
 class Shared {
     constructor(public status: Status, public awaiters: Array<Deferred<void>>) {
@@ -63,7 +63,7 @@ export class ReceiverEndedError extends Error {
 export class Sender<T> {
     constructor(
         private readonly shared: Shared,
-        private readonly enqueue: Enqueue<T | typeof Eof>,
+        private readonly enqueue: Enqueue<T | typeof eof>,
 
     ) { }
 
@@ -81,7 +81,7 @@ export class Sender<T> {
         this.assert()
         const [promise, resolve, reject] = defer<void>()
         this.shared.awaiters.push([resolve, reject])
-        this.enqueue(Eof)
+        this.enqueue(eof)
         return await promise
     }
 
@@ -98,15 +98,15 @@ export class Sender<T> {
 export class Receiver<T> {
     constructor(
         private readonly shared: Shared,
-        private readonly dequeue: Dequeue<T | typeof Eof>
+        private readonly dequeue: Dequeue<T | typeof eof>
     ) { }
     
     /** Receives one value from this channel or Eof if this Sender has called end. */
-    public async receive(): Promise<T | typeof Eof> {
+    public async receive(): Promise<T | typeof eof> {
         switch(this.shared.status) {
             case Status.OPEN: {
                 const value = await this.dequeue()
-                this.shared.status = value === Eof ? Status.ENDED_BY_SENDER : this.shared.status
+                this.shared.status = value === eof ? Status.ENDED_BY_SENDER : this.shared.status
                 const [resolve, _] = this.shared.awaiters.shift()!
                 resolve()
                 return value
@@ -116,10 +116,10 @@ export class Receiver<T> {
                     const [_, reject] = this.shared.awaiters.shift()!
                     reject(new SenderEndedError())
                 }
-                return Eof
+                return eof
             }
             case Status.ENDED_BY_RECEIVER: {
-                return Eof
+                return eof
             }
         }
     }
@@ -137,7 +137,7 @@ export class Receiver<T> {
     public async *[Symbol.asyncIterator](): AsyncGenerator<T> {
         while (true) {
             const next = await this.receive()
-            if (next === Eof) {
+            if (next === eof) {
                 return
             } else {
                 yield next
@@ -148,7 +148,7 @@ export class Receiver<T> {
 
 /** Creates an asynchronous channel. Returns a Sender and Receiver used to send and receive values on the channel. */
 export function channel<T = any>(): [Sender<T>, Receiver<T>] {
-    const [enqueue, dequeue] = queue<T | typeof Eof>()
+    const [enqueue, dequeue] = queue<T | typeof eof>()
     const shared = new Shared(Status.OPEN, [])
     const sender = new Sender<T>(shared, enqueue)
     const receiver = new Receiver<T>(shared, dequeue)
