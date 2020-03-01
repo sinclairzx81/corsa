@@ -26,13 +26,4 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { channel, Sender, Receiver } from './channel'
-
-export function duplex<T = any>(): [[Sender<T>, Receiver<T>], [Sender<T>, Receiver<T>]] {
-    const [sender_0, receiver_0] = channel<T>()
-    const [sender_1, receiver_1] = channel<T>()
-    return [
-        [sender_0, receiver_1],
-        [sender_1, receiver_0]
-    ]
-}
+export const into = <T>(func: () => Promise<T>) => func()

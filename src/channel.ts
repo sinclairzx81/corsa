@@ -27,7 +27,7 @@ THE SOFTWARE.
 ---------------------------------------------------------------------------*/
 
 import { defer, Resolver, Rejector } from './defer'
-import { queue, Enqueue, Dequeue }   from './queue'
+import { queue, Enqueue, Dequeue } from './queue'
 
 export const Eof = Symbol('Eof')
 
@@ -58,66 +58,80 @@ export class ReceiverEndedError extends Error {
 }
 
 export class Sender<T> {
-    constructor (
-        private readonly shared:  Shared,
+    constructor(
+        private readonly shared: Shared,
         private readonly enqueue: Enqueue<T | typeof Eof>,
 
     ) { }
-    
+
     private assert() {
-        switch(this.shared.status) {
+        switch (this.shared.status) {
             case Status.ENDED_BY_RECEIVER: throw new ReceiverEndedError()
             case Status.ENDED_BY_SENDER: throw new SenderEndedError()
         }
     }
 
-    public send(value: T): Promise<void> {
+    public async send(value: T): Promise<void> {
         this.assert()
-        const [promise, resolver, rejector] = defer<void>()
-        this.shared.awaiters.push([resolver, rejector])
+        const [promise, resolve, reject] = defer<void>()
+        this.shared.awaiters.push([resolve, reject])
         this.enqueue(value)
-        return promise
+        return await promise
     }
 
-    public end(): Promise<void> {
+    public async end(): Promise<void> {
         this.assert()
-        const [promise, resolver, rejector] = defer<void>()
-        this.shared.awaiters.push([resolver, rejector])
+        const [promise, resolve, reject] = defer<void>()
+        this.shared.awaiters.push([resolve, reject])
         this.enqueue(Eof)
-        return promise
+        return await promise
     }
 }
 
 export class Receiver<T> {
     constructor(
-        private readonly shared:  Shared,
+        private readonly shared: Shared,
         private readonly dequeue: Dequeue<T | typeof Eof>
     ) { }
 
     public async receive(): Promise<T | typeof Eof> {
-        if(this.shared.status === Status.OPEN) {
-            const value    = await this.dequeue()
-            const [resolver, _] = this.shared.awaiters.shift()!
-            resolver()
-            return value
-        } else {
-            return Eof
+        switch(this.shared.status) {
+            case Status.OPEN: {
+                const value = await this.dequeue()
+                if(value === Eof) {
+                    this.shared.status = Status.ENDED_BY_SENDER
+                }
+                const [resolve, _] = this.shared.awaiters.shift()!
+                resolve()
+                return value
+            }
+            case Status.ENDED_BY_SENDER: {
+                while (this.shared.awaiters.length > 0) {
+                    const [_, reject] = this.shared.awaiters.shift()!
+                    const error = new SenderEndedError()
+                    reject(error)
+                }
+                return Eof
+            }
+            case Status.ENDED_BY_RECEIVER: {
+                return Eof
+            }
         }
     }
 
     public end(): void {
         this.shared.status = Status.ENDED_BY_RECEIVER
-        while(this.shared.awaiters.length > 0) {
+        while (this.shared.awaiters.length > 0) {
             const [_, reject] = this.shared.awaiters.shift()!
             const error = new ReceiverEndedError()
             reject(error)
-        }    
+        }
     }
 
-    public async * [Symbol.asyncIterator](): AsyncGenerator<T> {
-        while(true) {
+    public async *[Symbol.asyncIterator](): AsyncGenerator<T> {
+        while (true) {
             const next = await this.receive()
-            if(next === Eof) {
+            if (next === Eof) {
                 return
             } else {
                 yield next
@@ -126,10 +140,10 @@ export class Receiver<T> {
     }
 }
 
-export function channel<T>(): [Sender<T>, Receiver<T>]  {
+export function channel<T = any>(): [Sender<T>, Receiver<T>] {
     const [enqueue, dequeue] = queue<T | typeof Eof>()
-    const shared   = new Shared(Status.OPEN, [])
-    const sender   = new Sender<T>(shared, enqueue)
+    const shared = new Shared(Status.OPEN, [])
+    const sender = new Sender<T>(shared, enqueue)
     const receiver = new Receiver<T>(shared, dequeue)
     return [sender, receiver]
 }
