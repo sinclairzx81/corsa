@@ -93,6 +93,7 @@ export class Sender<T> {
         }
     }
 }
+
 /** The receiving side of a channel. */
 export class Receiver<T> {
     constructor(
