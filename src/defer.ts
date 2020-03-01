@@ -29,6 +29,7 @@ THE SOFTWARE.
 export type Resolver<T> = (value: T) => void
 export type Rejector    = (error: Error) => void
 
+/** Returns a deferred that allows a promise to be resolved externally. */
 export function defer<T>(): [Promise<T>, Resolver<T>, Rejector] {
     let resolver: Resolver<T>
     let rejector: Rejector

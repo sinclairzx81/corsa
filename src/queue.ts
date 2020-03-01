@@ -31,6 +31,7 @@ import { Resolver, defer } from './defer'
 export type Enqueue<T> = (value: T) => void
 export type Dequeue<T> = ()         => Promise<T>
 
+/** Creates an asynchronous queue. Returns enqueue and dequeue functions. */
 export function queue<T>(): [Enqueue<T>, Dequeue<T>] {
     const promises: Promise<T>[]  = []   
     const resolvers: Resolver<T>[] = []

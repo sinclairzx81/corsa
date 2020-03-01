@@ -28,6 +28,7 @@ THE SOFTWARE.
 
 import { channel, Sender, Receiver } from './channel'
 
+/** Returns a duplex channel pair. Allows for bi-directional communication over two channels. */
 export function duplex<T = any>(): [[Sender<T>, Receiver<T>], [Sender<T>, Receiver<T>]] {
     const [sender_0, receiver_0] = channel<T>()
     const [sender_1, receiver_1] = channel<T>()
