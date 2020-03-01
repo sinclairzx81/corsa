@@ -34,11 +34,26 @@ output:
 > 1
 > done
 ```
+
+## Contents
+
+- [Overview](#Overview)
+- [channel](#channel)
+  - [Sender&lt;T&gt;](#Sender)
+  - [Receiver&lt;T&gt;](#Receiver)
+- [select](#select)
+- [duplex](#duplex)
+
+
+<a name="Overview"></a>
+
 ## Overview
 
 Corsa is a small library for creating asynchronous channels in JavaScript. It is intended to provide an alternative to event emitters, allowing for finer level control over asynchronous message buffering (back-pressure) by enabling a sender of messages to `await` for messages to be received.
 
 It is recommended that JavaScript environments support `async-await` and `for-await-of`. Additionally, It is recommended that TypeScript users use modern versions of the TypeScript compiler that provide `AsyncGenerator<T>` type in the `ESNext` target.
+
+<a name="channel"></a>
 
 ## channel&lt;T&gt;
 
@@ -47,6 +62,9 @@ A channel is a uni-directional pipe for which values can flow. Calling this func
 ```typescript
 const [sender, receiver] = channel()
 ```
+
+<a name="Sender"></a>
+
 ## Sender&lt;T&gt;
 
 A `Sender` allows the caller to send values into the channel to be received by its `Receiver`. The `Sender` provides two functions, `send()` and `end()`. Both of these functions can be awaited.
@@ -69,13 +87,15 @@ sender.send(2)       // buffer 2
 sender.send(3)       // buffer 3
 await sender.end()   // wait for receipt
 ```
-Note: the call to `end()` results in an `Eof` message being sent to the channel. See `Receiver` for details.
+Note: the call to `end()` results in an `eof` message being sent to the channel. See `Receiver` for details.
+
+<a name="Receiver"></a>
 
 ## Receiver&lt;T&gt;
 
-A `Receiver` is used to receive values sent from a `Sender`. It provides a `receive()`function to receive exactly one value, `Receiver` implements `[Symbol.asyncIterator]` which allows it to work with `for-await-of`. The `Receiver` also provides an `end()` function to inform the `Sender` that the `Receiver` won't accept more values. 
+A `Receiver` is used to receive values sent from a `Sender`. It provides a `receive()` function to receive exactly one value. `Receiver` implements `[Symbol.asyncIterator]` which allows it to work with `for-await-of`. The `Receiver` also provides an `end()` function to inform the `Sender` that the `Receiver` won't accept more values. 
 
-The `Receiver` `recieve()` function will return a promise that will resolve as soon as the `Sender` sender sends a value. If the `Sender` has already sent a value this `Promise` will resolve immediately. This function will return either `T` or `typeof Eof`. If `Eof` is received, all subsequent attempts to `receive()` will result in a `Eof`.
+The `Receiver` `recieve()` function will return a promise that will resolve as soon as the `Sender` sender sends a value. If the `Sender` has already sent a value this `Promise` will resolve immediately. This function will return either `T` or `typeof eof`. If `eof` is received, all subsequent attempts to `receive()` will result in a `eof`.
 
 The following code will receive all values in a channel using the `receive()` function to pull new values one by one.
 
@@ -94,15 +114,13 @@ into(async () => {
 into(async () => {
   while(true) {
     const value = await receiver.receive()
-    if(value === Eof) {
-      break // expect no more values
-    }
+    if(value === eof) break
     console.log(value)
   }
   console.log('done')
 })
 ```
-The `Receiver` also implements `[Symbol.asyncIterator]`, so its possible to rewrite this code as follows. Note, checking for `Eof` is not required when using `for-await-of`.
+The `Receiver` also implements `[Symbol.asyncIterator]`, so its possible to rewrite this code as follows. Note, checking for `eof` is not required when using `for-await-of`.
 
 ```typescript
 import { channel, into } from 'corsa'
@@ -134,8 +152,10 @@ sender.send(1).catch(error => console.log(error))
 // End receiver without receiving a value. This
 // causes the preceeding 'send' to throw.
 receiver.end()
-
 ```
+A `Receiver` may choose to end at any time. A `Sender` should apply the appropriate `try/catch` logic if a potential exists for a `Receiver` to end.
+
+<a name="select"></a>
 
 ## select
 
@@ -165,6 +185,9 @@ async function start() {
   }
 }
 ```
+
+<a name="duplex"></a>
+
 ## duplex
 
 Returns a bi-direction messaging channel. Useful for creating actor like systems in JavaScript.
