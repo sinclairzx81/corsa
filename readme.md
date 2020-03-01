@@ -9,20 +9,18 @@ Asynchronous channels in JavaScript
 $ npm install corsa --save
 ```
 ```typescript
-import { channel } from 'corsa'
+import { channel, into } from 'corsa'
 
 const [sender, receiver] = channel()
 
-setTimeout(async () => {
+into(async () => {
   await sender.send(3)
   await sender.send(2)
   await sender.send(1)
   await sender.end()
-}, 0)
+})
 
-...
-
-setTimeout(async () => {
+into(async () => {
   for await (const value of receiver) {
     console.log(value)
   }

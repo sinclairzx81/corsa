@@ -76,7 +76,7 @@ export class Sender<T> {
         return await promise
     }
 
-    /** End this channel. Returns a Promise that resolves once an Eof has been received. */
+    /** End this channel. Returns a Promise that resolves once an eof has been received. */
     public async end(): Promise<void> {
         this.assert()
         const [promise, resolve, reject] = defer<void>()
@@ -101,7 +101,7 @@ export class Receiver<T> {
         private readonly dequeue: Dequeue<T | typeof eof>
     ) { }
     
-    /** Receives one value from this channel or Eof if this Sender has called end. */
+    /** Receives one value from this channel or eof if the sender has ended. */
     public async receive(): Promise<T | typeof eof> {
         switch(this.shared.status) {
             case Status.OPEN: {
