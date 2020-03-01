@@ -98,9 +98,7 @@ export class Receiver<T> {
         switch(this.shared.status) {
             case Status.OPEN: {
                 const value = await this.dequeue()
-                if(value === Eof) {
-                    this.shared.status = Status.ENDED_BY_SENDER
-                }
+                this.shared.status = value === Eof ? Status.ENDED_BY_SENDER : this.shared.status
                 const [resolve, _] = this.shared.awaiters.shift()!
                 resolve()
                 return value
@@ -108,8 +106,7 @@ export class Receiver<T> {
             case Status.ENDED_BY_SENDER: {
                 while (this.shared.awaiters.length > 0) {
                     const [_, reject] = this.shared.awaiters.shift()!
-                    const error = new SenderEndedError()
-                    reject(error)
+                    reject(new SenderEndedError())
                 }
                 return Eof
             }
@@ -123,8 +120,7 @@ export class Receiver<T> {
         this.shared.status = Status.ENDED_BY_RECEIVER
         while (this.shared.awaiters.length > 0) {
             const [_, reject] = this.shared.awaiters.shift()!
-            const error = new ReceiverEndedError()
-            reject(error)
+            reject(new ReceiverEndedError())
         }
     }
 
