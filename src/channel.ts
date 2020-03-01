@@ -85,7 +85,7 @@ export class Sender<T> {
         return await promise
     }
 
-    /** Assets if a value is able to by sent. */
+    /** Asserts if a value can be sent. */
     private assert() {
         switch (this.shared.status) {
             case Status.ENDED_BY_RECEIVER: throw new ReceiverEndedError()
