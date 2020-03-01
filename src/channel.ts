@@ -45,18 +45,21 @@ class Shared {
     }
 }
 
+/** An error that is thrown when a Sender attempts to send subsequent values after calling end. */
 export class SenderEndedError extends Error {
     constructor() {
         super('Cannot send to to a closed channel.')
     }
 }
 
+/** An error that is thrown when a Sender attempts to send when the Receiver has ended the channel. */
 export class ReceiverEndedError extends Error {
     constructor() {
-        super('Cannot send to closed channel. Receiver ended.')
+        super('Cannot send to closed channel because the Receiver has called end.')
     }
 }
 
+/** The sending side of a channel. */
 export class Sender<T> {
     constructor(
         private readonly shared: Shared,
@@ -64,13 +67,7 @@ export class Sender<T> {
 
     ) { }
 
-    private assert() {
-        switch (this.shared.status) {
-            case Status.ENDED_BY_RECEIVER: throw new ReceiverEndedError()
-            case Status.ENDED_BY_SENDER: throw new SenderEndedError()
-        }
-    }
-
+    /** Sends a value to this channel. Returns a Promise that resolves once the Receiver has received it. */
     public async send(value: T): Promise<void> {
         this.assert()
         const [promise, resolve, reject] = defer<void>()
@@ -79,6 +76,7 @@ export class Sender<T> {
         return await promise
     }
 
+    /** End this channel. Returns a Promise that resolves once the Receiver has received an Eof. */
     public async end(): Promise<void> {
         this.assert()
         const [promise, resolve, reject] = defer<void>()
@@ -86,14 +84,23 @@ export class Sender<T> {
         this.enqueue(Eof)
         return await promise
     }
-}
 
+    /** Assets if a value is able to by sent. */
+    private assert() {
+        switch (this.shared.status) {
+            case Status.ENDED_BY_RECEIVER: throw new ReceiverEndedError()
+            case Status.ENDED_BY_SENDER: throw new SenderEndedError()
+        }
+    }
+}
+/** The receiving side of a channel. */
 export class Receiver<T> {
     constructor(
         private readonly shared: Shared,
         private readonly dequeue: Dequeue<T | typeof Eof>
     ) { }
-
+    
+    /** Receives one value or Eof from this channel. */
     public async receive(): Promise<T | typeof Eof> {
         switch(this.shared.status) {
             case Status.OPEN: {
@@ -116,6 +123,7 @@ export class Receiver<T> {
         }
     }
 
+    /** Ends this channel. Causes the Sender to 'throw' if it attempts to send more values. */
     public end(): void {
         this.shared.status = Status.ENDED_BY_RECEIVER
         while (this.shared.awaiters.length > 0) {
@@ -136,6 +144,7 @@ export class Receiver<T> {
     }
 }
 
+/** Creates an asynchronous channel. Returns a Sender and Receiver pair. */
 export function channel<T = any>(): [Sender<T>, Receiver<T>] {
     const [enqueue, dequeue] = queue<T | typeof Eof>()
     const shared = new Shared(Status.OPEN, [])
