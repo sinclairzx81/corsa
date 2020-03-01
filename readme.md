@@ -80,18 +80,18 @@ The `Receiver` `recieve()` function will return a promise that will resolve as s
 The following code will receive all values in a channel using the `receive()` function to pull new values one by one.
 
 ```typescript
-import { channel, Eof } from 'corsa'
+import { channel, into, eof } from 'corsa'
 
 const [sender, receiver] = channel<number>()
 
-setTimeout(async () => {
+into(async () => {
   await sender.send(3)
   await sender.send(2)
   await sender.send(1)
   await sender.end()
-}, 0)
+})
 
-setTimeout(async () => {
+into(async () => {
   while(true) {
     const value = await receiver.receive()
     if(value === Eof) {
@@ -100,27 +100,28 @@ setTimeout(async () => {
     console.log(value)
   }
   console.log('done')
-}, 0)
+})
 ```
 The `Receiver` also implements `[Symbol.asyncIterator]`, so its possible to rewrite this code as follows. Note, checking for `Eof` is not required when using `for-await-of`.
 
 ```typescript
-import { channel } from 'corsa'
+import { channel, into } from 'corsa'
 
 const [sender, receiver] = channel<number>()
-setTimeout(async () => {
+into(async () => {
   await sender.send(3)
   await sender.send(2)
   await sender.send(1)
   await sender.end()
-}, 0)
+})
 
-setTimeout(async () => {
+into(async () => {
   for await (const value of receiver) {
     console.log(value)
   }
   console.log('done')
-}, 0)
+})
+
 ```
 A `Receiver` may choose to `end()` receiving values. This allows for a kind of cancellation. When a `Receiver` calls `end()`, all values that have been sent to the channel will result in errors at `Sender`. Additionally subsequent `send()` will `throw` with a `Error(Receiver has closed this channel)` error.
 
