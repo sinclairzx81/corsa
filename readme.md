@@ -24,6 +24,7 @@ into(async () => {
   for await (const value of receiver) {
     console.log(value)
   }
+  console.log('done')
 })
 ```
 ```
