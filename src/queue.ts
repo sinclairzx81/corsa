@@ -26,7 +26,39 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-export { queue,   Enqueue, Dequeue}        from './queue'
-export { channel, Eof, Sender, Receiver }  from './channel'
-export { duplex }                          from './duplex'
-export { select }                          from './select'
+import { Resolver, defer } from './defer'
+
+export type Enqueue<T> = (value: T) => void
+export type Dequeue<T> = ()         => Promise<T>
+
+export function queue<T>(): [Enqueue<T>, Dequeue<T>] {
+    const promises: Promise<T>[]  = []   
+    const resolvers: Resolver<T>[] = []
+    
+    function dequeue(): Promise<T> {
+        if(promises.length > 0) {
+            const promise = promises.shift()!
+            return promise
+        } else {
+            const [promise, resolver] = defer<T>()
+            resolvers.push(resolver)
+            return promise
+        }
+    }
+
+    function enqueue(item: T) {
+        if(resolvers.length > 0) {
+            const resolver = resolvers.shift()!
+            resolver(item)
+        } else {
+            const [promise, awaiter] = defer<T>()
+            awaiter(item)
+            promises.push(promise)
+        }
+    }
+
+    return [   
+        value => enqueue(value),
+        ()    => dequeue()
+    ]
+}

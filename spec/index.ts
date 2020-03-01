@@ -1,2 +1,2 @@
-import './writable'
-import './readable'
+import './sender'
+import './receiver'

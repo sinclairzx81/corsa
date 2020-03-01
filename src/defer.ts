@@ -26,7 +26,15 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-export { queue,   Enqueue, Dequeue}        from './queue'
-export { channel, Eof, Sender, Receiver }  from './channel'
-export { duplex }                          from './duplex'
-export { select }                          from './select'
+export type Resolver<T> = (value: T) => void
+export type Rejector    = (error: Error) => void
+
+export function defer<T>(): [Promise<T>, Resolver<T>, Rejector] {
+    let resolver: Resolver<T>
+    let rejector: Rejector
+    const promise = new Promise<T>((resolve, reject) => {
+        resolver = resolve
+        rejector = reject
+    })
+    return [promise, resolver!, rejector!]
+}

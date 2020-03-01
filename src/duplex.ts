@@ -26,7 +26,13 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-export { queue,   Enqueue, Dequeue}        from './queue'
-export { channel, Eof, Sender, Receiver }  from './channel'
-export { duplex }                          from './duplex'
-export { select }                          from './select'
+import { channel, Sender, Receiver } from './channel'
+
+export function duplex<T>(): [[Sender<T>, Receiver<T>], [Sender<T>, Receiver<T>]] {
+    const [sender_0, receiver_0] = channel<T>()
+    const [sender_1, receiver_1] = channel<T>()
+    return [
+        [sender_0, receiver_1],
+        [sender_1, receiver_0]
+    ]
+}
