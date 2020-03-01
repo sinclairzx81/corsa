@@ -67,7 +67,7 @@ export class Sender<T> {
 
     ) { }
 
-    /** Sends a value to this channel. Returns a Promise that resolves once the Receiver has received it. */
+    /** Sends one value to this channel. Returns a Promise that resolves once the value has been received. */
     public async send(value: T): Promise<void> {
         this.assert()
         const [promise, resolve, reject] = defer<void>()
@@ -76,7 +76,7 @@ export class Sender<T> {
         return await promise
     }
 
-    /** End this channel. Returns a Promise that resolves once the Receiver has received an Eof. */
+    /** End this channel. Returns a Promise that resolves once an Eof has been received. */
     public async end(): Promise<void> {
         this.assert()
         const [promise, resolve, reject] = defer<void>()
@@ -100,7 +100,7 @@ export class Receiver<T> {
         private readonly dequeue: Dequeue<T | typeof Eof>
     ) { }
     
-    /** Receives one value or Eof from this channel. */
+    /** Receives one value from this channel or Eof if this Sender has called end. */
     public async receive(): Promise<T | typeof Eof> {
         switch(this.shared.status) {
             case Status.OPEN: {
@@ -123,7 +123,7 @@ export class Receiver<T> {
         }
     }
 
-    /** Ends this channel. Causes the Sender to 'throw' if it attempts to send more values. */
+    /** Ends this channel. Causes the Sender to 'throw' if there are subsequent attempts to send. */
     public end(): void {
         this.shared.status = Status.ENDED_BY_RECEIVER
         while (this.shared.awaiters.length > 0) {
@@ -132,6 +132,7 @@ export class Receiver<T> {
         }
     }
 
+    /** The async iterator for this receiver. */
     public async *[Symbol.asyncIterator](): AsyncGenerator<T> {
         while (true) {
             const next = await this.receive()
